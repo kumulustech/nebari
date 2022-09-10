@@ -34,6 +34,24 @@ resource "helm_release" "keycloak" {
 }
 
 
+resource "kubernetes_manifest" "keycloak-redirect-scheme-middleware" {
+  manifest = {
+    apiVersion = "traefik.containo.us/v1alpha1"
+    kind       = "Middleware"
+    metadata = {
+      name      = "redirectscheme"
+      namespace = var.namespace
+    }
+    spec = {
+      redirectScheme = {
+        scheme    = "https"
+        permanent = true
+      }
+    }
+  }
+}
+
+
 resource "kubernetes_manifest" "keycloak-http" {
   manifest = {
     apiVersion = "traefik.containo.us/v1alpha1"
@@ -53,6 +71,12 @@ resource "kubernetes_manifest" "keycloak-http" {
               name = "keycloak-headless"
               # Really not sure why 8080 works here
               port      = 80
+              namespace = var.namespace
+            }
+          ]
+          middlewares = [
+            {
+              name      = "redirectscheme"
               namespace = var.namespace
             }
           ]
