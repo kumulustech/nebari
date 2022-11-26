@@ -42,6 +42,7 @@ env:
 
 jobs:
   test-render-providers:
+    if: github.event.pull_request.head.repo.name == github.repository || github.event_name != 'pull_request'
     name: 'Test Nebari Provider'
     runs-on: ubuntu-latest
     strategy:
