@@ -111,10 +111,21 @@ variable "cdsdashboards" {
   }
 }
 
+variable "conda-store-service-name" {
+  description = "Name of conda-store service"
+  type        = string
+}
+
 variable "conda-store-environments" {
   description = "conda environments from conda-store in filesystem namespace"
   type        = any
   default     = {}
+}
+
+variable "conda-store-cdsdashboard-token" {
+  description = "Token for cdsdashboards to use conda-store"
+  type        = string
+  default     = ""
 }
 
 variable "jupyterhub-logout-redirect-url" {
@@ -127,4 +138,9 @@ variable "jupyterhub-hub-extraEnv" {
   description = "Extracted overrides to merge with jupyterhub.hub.extraEnv"
   type        = string
   default     = "[]"
+}
+
+variable "default-conda-store-namespace" {
+  description = "Default conda-store namespace"
+  type        = string
 }

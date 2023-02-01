@@ -37,3 +37,22 @@ variable "jupyterhub-hub-extraEnv" {
   type        = string
   default     = "[]"
 }
+
+variable "conda-store-default-namespace" {
+  description = "Default conda-store namespace name"
+  type        = string
+  default     = "nebari-git"
+}
+
+variable "conda-store-service-token-scopes" {
+  description = "Map of services tokens and scopes for conda-store"
+  type        = map(any)
+  default = {
+    "cdsdashboards" = {
+      "primary_namespace" : "cdsdashboards",
+      "role_bindings" : {
+        "*/*" : ["viewer"],
+      }
+    }
+  }
+}

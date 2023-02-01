@@ -20,6 +20,7 @@ resource "kubernetes_secret" "gateway" {
       worker-images                        = var.extra-worker-images
       init-container-cmd                   = var.init-container-cmd
       extra-worker-mounts                  = var.extra-worker-mounts
+      default-conda-store-namespace        = var.default-conda-store-namespace
       conda-store-pvc                      = var.conda-store-pvc
       conda-store-mount                    = var.conda-store-mount
       worker-node-group                    = var.worker-node-group

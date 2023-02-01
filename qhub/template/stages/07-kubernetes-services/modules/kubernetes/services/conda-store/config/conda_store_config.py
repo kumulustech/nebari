@@ -41,6 +41,8 @@ c.S3Storage.secret_key = config["minio-password"]
 c.S3Storage.region = "us-east-1"  # minio region default
 c.S3Storage.bucket_name = "conda-store"
 
+c.CondaStore.default_namespace = "global"
+c.CondaStore.filesystem_namespace = config["default-namespace"]
 
 # ==================================
 #        server settings
@@ -102,11 +104,12 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             if role in role_mappings
         }
         username = user_data["preferred_username"]
-        namespaces = {username, "default", "filesystem"}
+        default_namespace = config["default-namespace"]
+        namespaces = {username, "global", default_namespace}
         role_bindings = {
             f"{username}/*": {"admin"},
-            "filesystem/*": {"viewer"},
-            "default/*": roles,
+            f"{default_namespace}/*": {"viewer"},
+            "global/*": roles,
         }
 
         for group in user_data.get("groups", []):
@@ -129,6 +132,10 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
 
 
 c.CondaStoreServer.authentication_class = KeyCloakAuthentication
+c.AuthenticationBackend.predefined_tokens = {
+    service_token: service_permissions
+    for service_token, service_permissions in config["service-tokens"].items()
+}
 
 # ==================================
 #         worker settings
@@ -136,6 +143,9 @@ c.CondaStoreServer.authentication_class = KeyCloakAuthentication
 c.CondaStoreWorker.log_level = logging.INFO
 c.CondaStoreWorker.watch_paths = ["/opt/environments"]
 c.CondaStoreWorker.concurrency = 4
+
+# Template used to form the directory for symlinking conda environment builds.
+c.CondaStore.environment_directory = "/home/conda/{namespace}/envs/{namespace}-{name}"
 
 # extra-settings to apply simply as `c.Class.key = value`
 conda_store_settings = config["extra-settings"]

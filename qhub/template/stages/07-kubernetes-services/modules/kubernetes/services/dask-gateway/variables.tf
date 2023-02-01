@@ -211,3 +211,8 @@ variable "extra-worker-mounts" {
     }))
   })
 }
+
+variable "default-conda-store-namespace" {
+  description = "Default conda-store namespace"
+  type        = string
+}
