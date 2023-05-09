@@ -14,7 +14,11 @@ from ruamel.yaml import YAML
 
 import nebari
 from nebari.deprecate import DEPRECATED_FILE_PATHS
-from nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
+from nebari.provider.cicd.github import (
+    gen_nebari_linter,
+    gen_nebari_ops,
+    gen_nebari_teardown,
+)
 from nebari.provider.cicd.gitlab import gen_gitlab_ci
 from nebari.stages import tf_objects
 
@@ -214,6 +218,7 @@ def gen_cicd(config):
         gha_dir = ".github/workflows/"
         cicd_files[gha_dir + "nebari-ops.yaml"] = gen_nebari_ops(config)
         cicd_files[gha_dir + "nebari-linter.yaml"] = gen_nebari_linter(config)
+        cicd_files[gha_dir + "nebari-teardown.yaml"] = gen_nebari_teardown(config)
 
     elif cicd_provider == "gitlab-ci":
         cicd_files[".gitlab-ci.yml"] = gen_gitlab_ci(config)

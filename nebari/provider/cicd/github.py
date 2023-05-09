@@ -339,3 +339,7 @@ def gen_nebari_linter(config):
         env=env_vars,
         jobs=jobs,
     )
+
+
+def gen_nebari_teardown(config):
+    pass
