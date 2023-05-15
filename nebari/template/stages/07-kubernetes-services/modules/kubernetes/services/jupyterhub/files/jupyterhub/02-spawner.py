@@ -20,6 +20,10 @@ cdsdashboards = z2jh.get_config("custom.cdsdashboards")
 @gen.coroutine
 def get_username_hook(spawner):
     auth_state = yield spawner.user.get_auth_state()
+    with open("/tmp/auth_state.json", "w") as f:
+        f.write(str(auth_state))
+        f.write("\n")
+        f.write(str(dir(auth_state)))
     username = auth_state["oauth_user"]["preferred_username"]
 
     spawner.environment.update(
@@ -28,6 +32,14 @@ def get_username_hook(spawner):
         }
     )
 
+
+@gen.coroutine
+def write_auth_state_hook_info(spawner, auth_state):
+    with open("/tmp/auth_state_from_auth_state_hook.json", "w") as f:
+        f.write(str(auth_state))
+
+
+c.Spawner.auth_state_hook = write_auth_state_hook_info
 
 c.Spawner.pre_spawn_hook = get_username_hook
 
