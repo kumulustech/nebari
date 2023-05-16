@@ -1,3 +1,7 @@
+# data "aws_vpc" "selected" {
+#   id = var.vpc_id
+# }
+
 resource "aws_eks_cluster" "main" {
   name     = var.name
   role_arn = aws_iam_role.cluster.arn
