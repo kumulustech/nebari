@@ -11,7 +11,7 @@ from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
 
-class BaseCloudProviderInputVars(schema.BaseModel):
+class InputVars(schema.BaseModel):
     name: str
     environment: str
     cloud_provider: str
@@ -33,7 +33,7 @@ class KubernetesInitializeStage(NebariTerraformStage):
         ]
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
-        InputVars = BaseCloudProviderInputVars(
+        input_vars = InputVars(
             name=self.config.project_name,
             environment=self.config.namespace,
             cloud_provider=self.config.provider.value,
@@ -41,22 +41,22 @@ class KubernetesInitializeStage(NebariTerraformStage):
         )
 
         if self.config.provider == schema.ProviderEnum.gcp:
-            InputVars.gpu_enabled = any(
+            input_vars.gpu_enabled = any(
                 node_group.guest_accelerators
                 for node_group in self.config.google_cloud_platform.node_groups.values()
             )
 
         elif self.config.provider == schema.ProviderEnum.aws:
-            InputVars.gpu_enabled = any(
+            input_vars.gpu_enabled = any(
                 node_group.gpu
                 for node_group in self.config.amazon_web_services.node_groups.values()
             )
-            InputVars.gpu_node_group_names = [
+            input_vars.gpu_node_group_names = [
                 group for group in self.config.amazon_web_services.node_groups.keys()
             ]
-            InputVars.aws_region = self.config.amazon_web_services.region
+            input_vars.aws_region = self.config.amazon_web_services.region
 
-        return InputVars.dict()
+        return input_vars.dict()
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
         from kubernetes import client, config
