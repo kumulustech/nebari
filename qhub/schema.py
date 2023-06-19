@@ -335,11 +335,19 @@ class Theme(Base):
     jupyterhub: typing.Dict[str, typing.Union[str, list]]
 
 
-# ================= Theme ==================
+# ================= JupyterHub ==================
+
+
+class VolumeEntry(Base):
+    name: str
+    persistentVolumeClaim: dict = None
+    configMap: dict = None
+    kind: str = None
 
 
 class JupyterHub(Base):
     overrides: typing.Optional[typing.Dict]
+    extra_mounts: typing.Optional[typing.Dict[str, VolumeEntry]]
 
 
 # ================== Profiles ==================

@@ -56,3 +56,9 @@ variable "conda-store-service-token-scopes" {
     }
   }
 }
+
+variable "jupyterhub-extra-mounts" {
+  description = "Extracted extra mounts to merge with to jupyterhub.extra-mounts"
+  type        = map(any)
+  default     = {}
+}

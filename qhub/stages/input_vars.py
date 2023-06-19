@@ -311,6 +311,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "jupyterhub-overrides": [
             json.dumps(config.get("jupyterhub", {}).get("overrides", {}))
         ],
+        "jupyterhub-extra-mounts": config.get("jupyterhub", {}).get("extra_mounts", []),
         "jupyterhub-hub-extraEnv": json.dumps(
             config.get("jupyterhub", {})
             .get("overrides", {})

@@ -203,7 +203,7 @@ def base_profile_extra_mounts():
                 "name": volume["name"],
                 "persistentVolumeClaim": {"claimName": volume["name"]},
             }
-            if volume["kind"] == "persistentvolumeclaim"
+            if volume["kind"].lower() == "persistentvolumeclaim"
             else {"name": volume["name"], "configMap": {"name": volume["name"]}}
             for mount_path, volume in extra_mounts.items()
         ]

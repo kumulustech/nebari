@@ -105,13 +105,16 @@ module "jupyterhub" {
   conda-store-cdsdashboard-token = module.kubernetes-conda-store-server.service-tokens.cdsdashboards
   conda-store-service-name       = module.kubernetes-conda-store-server.service_name
 
-  extra-mounts = {
-    "/etc/dask" = {
-      name      = "dask-etc"
-      namespace = var.environment
-      kind      = "configmap"
-    },
-  }
+  extra-mounts = merge(
+    var.jupyterhub-extra-mounts,
+    {
+      "/etc/dask" = {
+        name      = "dask-etc"
+        namespace = var.environment
+        kind      = "configmap"
+      },
+    }
+  )
 
   services = concat([
     "dask-gateway"
