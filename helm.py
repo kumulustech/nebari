@@ -23,9 +23,9 @@ def download_helm_binary(version="v3.12.1"):
     helm_path = f"{platform.system().lower()}-{platform.machine()}"
     download_url = urljoin(base, f"helm-{version}-{helm_path}.tar.gz")
 
-    final_path = Path(tempfile.gettempdir()) / helm / version
-    final_path.mkdir(parents=True, exist_ok=True)
-    final_path = final_path / helm
+    helm_dir = Path(tempfile.gettempdir()) / helm / version
+    helm_dir.mkdir(parents=True, exist_ok=True)
+    final_path = helm_dir / helm
 
     if not final_path.is_file():
         with tempfile.TemporaryDirectory() as tmp_dir:
