@@ -5,10 +5,10 @@ from typing import Any, Dict, List
 import typer
 from pluggy import HookimplMarker, HookspecMarker
 
+from nebari import schema
+
 hookspec = HookspecMarker("nebari")
 hookimpl = HookimplMarker("nebari")
-
-from nebari import schema
 
 
 class NebariStage:
