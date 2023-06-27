@@ -343,6 +343,7 @@ class VolumeEntry(Base):
     persistentVolumeClaim: dict = None
     configMap: dict = None
     kind: str = None
+    subPath: typing.Optional[str] = None
 
 
 class JupyterHub(Base):

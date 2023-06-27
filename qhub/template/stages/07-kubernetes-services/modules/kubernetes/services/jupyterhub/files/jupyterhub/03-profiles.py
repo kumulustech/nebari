@@ -209,15 +209,17 @@ def base_profile_extra_mounts():
         ]
     }
 
-    extra_container_config = {
-        "volumeMounts": [
-            {
-                "name": volume["name"],
-                "mountPath": mount_path,
-            }
-            for mount_path, volume in extra_mounts.items()
-        ]
-    }
+    extra_container_config = {"volumeMounts": []}
+
+    for mount_path, volume in extra_mounts.items():
+        _container = {
+            "name": volume["name"],
+            "mountPath": mount_path,
+        }
+        if volume["subPath"]:
+            _container["subPath"] = volume["subPath"]
+        extra_container_config["volumeMounts"].append(_container)
+
     return {
         "extra_pod_config": extra_pod_config,
         "extra_container_config": extra_container_config,
