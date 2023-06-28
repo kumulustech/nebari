@@ -216,7 +216,7 @@ def base_profile_extra_mounts():
             "name": volume["name"],
             "mountPath": mount_path,
         }
-        if volume["subPath"]:
+        if volume.get("subPath"):
             _container["subPath"] = volume["subPath"]
         extra_container_config["volumeMounts"].append(_container)
 
