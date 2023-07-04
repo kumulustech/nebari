@@ -11,6 +11,7 @@ resource "kubernetes_persistent_volume_claim" "main" {
         storage = var.nfs_capacity
       }
     }
+    storage_class_name = var.storage_class_name
   }
 }
 

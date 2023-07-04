@@ -37,6 +37,12 @@ variable "jupyterhub-shared-storage" {
   type        = string
 }
 
+variable "storage_class_name" {
+  description = "Storage class name to use for nfs server"
+  type        = string
+  default     = "premium-rwo"
+}
+
 variable "jupyterhub-shared-endpoint" {
   description = "JupyterHub shared storage nfs endpoint"
   type        = string
@@ -62,10 +68,11 @@ module "kubernetes-nfs-server" {
 
   source = "./modules/kubernetes/nfs-server"
 
-  name         = "nfs-server"
-  namespace    = var.environment
-  nfs_capacity = var.jupyterhub-shared-storage
-  node-group   = var.node_groups.general
+  name               = "nfs-server"
+  namespace          = var.environment
+  nfs_capacity       = var.jupyterhub-shared-storage
+  node-group         = var.node_groups.general
+  storage-class-name = var.storage_class_name
 }
 
 

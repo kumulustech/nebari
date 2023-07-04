@@ -21,3 +21,9 @@ variable "node-group" {
     value = string
   })
 }
+
+variable "storage_class_name" {
+  description = "Storage class name to use for nfs server"
+  type        = string
+  default     = "premium-rwo"
+}
