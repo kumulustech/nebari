@@ -72,7 +72,7 @@ module "kubernetes-nfs-server" {
   namespace          = var.environment
   nfs_capacity       = var.jupyterhub-shared-storage
   node-group         = var.node_groups.general
-  storage-class-name = var.storage_class_name
+  storage_class_name = var.storage_class_name
 }
 
 
