@@ -16,6 +16,7 @@ on:
       - main
       - develop
       - release/\d{4}.\d{1,2}.\d{1,2}
+      - test-k8s-new
     paths:
       - ".github/workflows/kubernetes_test.yaml"
       - "tests/**"
