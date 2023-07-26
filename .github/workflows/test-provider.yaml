@@ -16,10 +16,6 @@ on:
       - "src/**"
       - "pyproject.toml"
   push:
-    branches:
-      - main
-      - develop
-      - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
       - ".github/workflows/test-provider.yaml"
       - "tests/**"
