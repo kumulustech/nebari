@@ -136,6 +136,20 @@ variable "controller" {
   }
 }
 
+variable "cluster-additional-fields-configuration" {
+  description = "value"
+  type = object({
+    idle_timeout      = number
+    image_pull_policy = string
+    environment       = map(string)
+  })
+  default = {
+    idle_timeout      = 1800 # 30 minutes
+    image_pull_policy = "IfNotPresent"
+    environment       = {}
+  }
+}
+
 variable "cluster" {
   description = "dask gateway cluster defaults"
   type = object({
@@ -153,10 +167,6 @@ variable "cluster" {
     worker_memory_limit           = string
     worker_extra_container_config = any
     worker_extra_pod_config       = any
-    # additional fields
-    idle_timeout      = number
-    image_pull_policy = string
-    environment       = map(string)
   })
   default = {
     # scheduler configuration
@@ -173,10 +183,6 @@ variable "cluster" {
     worker_memory_limit           = "2 G"
     worker_extra_container_config = {}
     worker_extra_pod_config       = {}
-    # additional fields
-    idle_timeout      = 1800 # 30 minutes
-    image_pull_policy = "IfNotPresent"
-    environment       = {}
   }
 }
 

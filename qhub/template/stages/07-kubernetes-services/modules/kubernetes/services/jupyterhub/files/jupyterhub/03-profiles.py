@@ -194,32 +194,52 @@ def profile_conda_store_mounts(username, groups):
     }
 
 
-def base_profile_extra_mounts():
-    extra_mounts = z2jh.get_config("custom.extra-mounts")
+def base_profile_extra_mounts(extra_mounts=None):
+    if extra_mounts is None:
+        # this should allow testing without having to specify extra_mounts
+        extra_mounts = z2jh.get_config("custom.extra-mounts")
 
     extra_pod_config = {
-        "volumes": [
-            {
-                "name": volume["name"],
-                "persistentVolumeClaim": {"claimName": volume["name"]},
-            }
-            if volume["kind"].lower() == "persistentvolumeclaim"
-            else {"name": volume["name"], "configMap": {"name": volume["name"]}}
-            for mount_path, volume in extra_mounts.items()
-        ]
+        "volumes": [],
     }
+
+    existing_volume_names = set()
+
+    for mount_path, volume in extra_mounts.items():
+        if volume["name"] not in existing_volume_names:
+            existing_volume_names.add(volume["name"])
+
+            if volume["kind"].lower() == "persistentvolumeclaim":
+                extra_pod_config["volumes"].append(
+                    {
+                        "name": volume["name"],
+                        "persistentVolumeClaim": {"claimName": volume["name"]},
+                    }
+                )
+            else:
+                extra_pod_config["volumes"].append(
+                    {
+                        "name": volume["name"],
+                        "configMap": {"name": volume["name"]},
+                    }
+                )
 
     extra_container_config = {"volumeMounts": []}
 
     for mount_path, volume in extra_mounts.items():
-        if "mounts" in volume.keys():
-            extra_container_config["volumeMounts"] += volume["mounts"]
+        if volume["kind"].lower() == "persistentvolumeclaim":
+            _container = {
+                "name": volume["name"],
+                "mountPath": mount_path,
+            }
+            if volume.get("subPath"):
+                _container["subPath"] = volume["subPath"]
         else:
             _container = {
                 "name": volume["name"],
                 "mountPath": mount_path,
             }
-            extra_container_config["volumeMounts"].append(_container)
+        extra_container_config["volumeMounts"].append(_container)
 
     return {
         "extra_pod_config": extra_pod_config,

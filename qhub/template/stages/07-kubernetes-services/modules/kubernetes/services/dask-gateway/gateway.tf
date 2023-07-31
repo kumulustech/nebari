@@ -16,6 +16,7 @@ resource "kubernetes_secret" "gateway" {
       controller                           = var.controller
       cluster                              = var.cluster
       cluster-image                        = var.cluster-image
+      cluster-additional-fields            = var.cluster-additional-fields-configuration
       profiles                             = var.profiles
       worker-images                        = var.extra-worker-images
       init-container-cmd                   = var.init-container-cmd

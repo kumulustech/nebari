@@ -27,6 +27,15 @@ variable "dask-init-container-cmd" {
   type        = bool
 }
 
+variable "dask-additional-config" {
+  description = "Additional configuration to add to Dask Gateway cluster"
+  type = object({
+    idle_timeout      = number
+    image_pull_policy = string
+    environment       = map(string)
+  })
+}
+
 # =================== RESOURCES =====================
 module "dask-gateway" {
   source = "./modules/kubernetes/services/dask-gateway"
@@ -37,7 +46,8 @@ module "dask-gateway" {
 
   external-url = var.endpoint
 
-  cluster-image = var.dask-worker-image
+  cluster-image                           = var.dask-worker-image
+  cluster-additional-fields-configuration = var.dask-additional-config
 
   general-node-group = var.node_groups.general
   worker-node-group  = var.node_groups.worker

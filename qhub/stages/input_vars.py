@@ -332,6 +332,9 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "dask-extra-worker-mounts": config.get("dask_gateway", {}).get(
             "extra_worker_mounts", {}
         ),
+        "dask-additional-config": config.get("dask_gateway", {}).get(
+            "additional-fields"
+        ),
         # monitoring
         "monitoring-enabled": config["monitoring"]["enabled"],
         # argo-worfklows

@@ -28,8 +28,10 @@ c.KubeBackend.gateway_instance = config["gateway_service_name"]
 c.KubeClusterConfig.image = (
     f"{config['cluster-image']['name']}:{config['cluster-image']['tag']}"
 )
-c.KubeClusterConfig.image_pull_policy = config["cluster"]["image_pull_policy"]
-c.KubeClusterConfig.environment = config["cluster"]["environment"]
+c.KubeClusterConfig.image_pull_policy = config["cluster-additional-fields"][
+    "image_pull_policy"
+]
+c.KubeClusterConfig.environment = config["cluster-additional-fields"]["environment"]
 c.KubeClusterConfig.idle_timeout = config["cluster"]["idle_timeout"]
 
 c.KubeClusterConfig.scheduler_cores = config["cluster"]["scheduler_cores"]
