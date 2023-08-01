@@ -29,11 +29,7 @@ variable "dask-init-container-cmd" {
 
 variable "dask-additional-config" {
   description = "Additional configuration to add to Dask Gateway cluster"
-  type = object({
-    idle_timeout      = number
-    image_pull_policy = string
-    environment       = map(string)
-  })
+  default     = null
 }
 
 # =================== RESOURCES =====================

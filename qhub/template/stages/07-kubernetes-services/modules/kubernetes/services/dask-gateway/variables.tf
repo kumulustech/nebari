@@ -138,13 +138,15 @@ variable "controller" {
 
 variable "cluster-additional-fields-configuration" {
   description = "Additional configuration to add to Dask Gateway cluster"
-  nullable    = false
   type = object({
     idle_timeout      = number
     image_pull_policy = string
     environment       = map(string)
   })
-  default = {
+}
+
+locals {
+  dask-additional-config = try(length(var.dask-additional-config)) > 0 ? var.dask-additional-config : {
     idle_timeout      = 1800 # 30 minutes
     image_pull_policy = "IfNotPresent"
     environment       = {}
