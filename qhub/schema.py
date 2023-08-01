@@ -398,6 +398,7 @@ class DaskGateway(Base):
     worker_extra_images: typing.Optional[typing.Dict[str, str]]
     init_container_cmd: typing.Optional[bool]
     extra_worker_mounts: typing.Optional[typing.Dict[str, typing.List]]
+    additional_config: typing.Optional[typing.Dict[str, typing.Any]]
 
 
 class DaskWorkerProfile(Base):

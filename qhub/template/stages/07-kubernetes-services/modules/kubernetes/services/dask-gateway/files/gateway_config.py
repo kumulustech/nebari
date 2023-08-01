@@ -32,7 +32,7 @@ c.KubeClusterConfig.image_pull_policy = config["cluster-additional-fields"][
     "image_pull_policy"
 ]
 c.KubeClusterConfig.environment = config["cluster-additional-fields"]["environment"]
-c.KubeClusterConfig.idle_timeout = config["cluster"]["idle_timeout"]
+c.KubeClusterConfig.idle_timeout = config["cluster-additional-fields"]["idle_timeout"]
 
 c.KubeClusterConfig.scheduler_cores = config["cluster"]["scheduler_cores"]
 c.KubeClusterConfig.scheduler_cores_limit = config["cluster"]["scheduler_cores_limit"]

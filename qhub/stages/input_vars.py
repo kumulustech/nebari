@@ -333,7 +333,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
             "extra_worker_mounts", {}
         ),
         "dask-additional-config": config.get("dask_gateway", {}).get(
-            "additional-fields"
+            "additional_config"
         ),
         # monitoring
         "monitoring-enabled": config["monitoring"]["enabled"],
