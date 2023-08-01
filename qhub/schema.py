@@ -338,10 +338,10 @@ class Theme(Base):
 # ================= JupyterHub ==================
 
 
-class VolumeMount(Base):
-    name: str
-    mountPath: str
-    subPath: typing.Optional[str] = None
+# class VolumeMount(Base):
+#     name: str
+#     mountPath: str
+#     subPath: typing.Optional[str] = None
 
 
 class VolumeEntry(Base):
@@ -349,7 +349,7 @@ class VolumeEntry(Base):
     persistentVolumeClaim: dict = None
     configMap: dict = None
     kind: str = None
-    mounts: typing.List[VolumeMount] = None
+    subPath: typing.Optional[str] = None
 
 
 class JupyterHub(Base):
