@@ -145,14 +145,6 @@ variable "cluster-additional-fields-configuration" {
   })
 }
 
-locals {
-  dask-additional-config = try(length(var.dask-additional-config)) > 0 ? var.dask-additional-config : {
-    idle_timeout      = 1800 # 30 minutes
-    image_pull_policy = "IfNotPresent"
-    environment       = {}
-  }
-}
-
 variable "cluster" {
   description = "dask gateway cluster defaults"
   type = object({

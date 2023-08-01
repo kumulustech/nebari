@@ -16,7 +16,7 @@ resource "kubernetes_secret" "gateway" {
       controller                           = var.controller
       cluster                              = var.cluster
       cluster-image                        = var.cluster-image
-      cluster-additional-fields            = var.cluster-additional-fields-configuration
+      cluster-additional-fields            = local.cluster-additional-fields-configuration
       profiles                             = var.profiles
       worker-images                        = var.extra-worker-images
       init-container-cmd                   = var.init-container-cmd
@@ -244,5 +244,13 @@ resource "kubernetes_deployment" "gateway" {
         }
       }
     }
+  }
+}
+
+locals {
+  cluster-additional-fields-configuration = try(length(var.cluster-additional-fields-configuration)) > 0 ? var.cluster-additional-fields-configuration : {
+    idle_timeout      = 1800 # 30 minutes
+    image_pull_policy = "IfNotPresent"
+    environment       = {}
   }
 }
