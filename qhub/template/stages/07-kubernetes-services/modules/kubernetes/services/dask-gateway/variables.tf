@@ -137,7 +137,8 @@ variable "controller" {
 }
 
 variable "cluster-additional-fields-configuration" {
-  description = "value"
+  description = "Additional configuration to add to Dask Gateway cluster"
+  nullable    = false
   type = object({
     idle_timeout      = number
     image_pull_policy = string
