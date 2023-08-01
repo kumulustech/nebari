@@ -248,7 +248,7 @@ resource "kubernetes_deployment" "gateway" {
 }
 
 locals {
-  cluster-additional-fields-configuration = try(length(var.cluster-additional-fields-configuration)) > 0 ? var.cluster-additional-fields-configuration : {
+  cluster-additional-fields-configuration = try(length(var.cluster-additional-fields-configuration), 0) > 0 ? var.cluster-additional-fields-configuration : {
     idle_timeout      = 1800 # 30 minutes
     image_pull_policy = "IfNotPresent"
     environment       = {}
