@@ -1,0 +1,48 @@
+s3:
+  include:
+    names_regex:
+      - pytest.*
+IAMRoles:
+  include:
+    names_regex:
+      - pytest.*
+NatGateway:
+  include:
+    names_regex:
+      - pytest.*
+DynamoDB:
+  include:
+    names_regex:
+      - pytest.*
+EBSVolume:
+  include:
+    names_regex:
+      - pytest.*
+VPC:
+  include:
+    names_regex:
+      - pytest.*
+AutoScalingGroup:
+  include:
+    names_regex:
+      - pytest.*
+ElasticIP:
+  include:
+    names_regex:
+      - pytest.*
+EC2:
+  include:
+    names_regex:
+      - pytest.*
+EKSCluster:
+  include:
+    names_regex:
+      - pytest.*
+ElasticFileSystem:
+  include:
+    names_regex:
+      - pytest.*
+ELBv2:
+  include:
+    names_regex:
+      - pytest.*
