@@ -70,7 +70,7 @@ def _create_nebari_user(config):
 
     from _nebari.keycloak import create_user, get_keycloak_admin_from_config
 
-    keycloak_admin = get_keycloak_admin_from_config(config)
+    keycloak_admin = get_keycloak_admin_from_config(config, verify_tls=False)
     try:
         user = create_user(keycloak_admin, "pytest", "pytest-password")
         return user

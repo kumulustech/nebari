@@ -84,7 +84,7 @@ def list_users(keycloak_admin: keycloak.KeycloakAdmin):
         )
 
 
-def get_keycloak_admin_from_config(config):
+def get_keycloak_admin_from_config(config, verify_tls=None):
     keycloak_server_url = os.environ.get(
         "KEYCLOAK_SERVER_URL", f"https://{config['domain']}/auth/"
     )
@@ -95,7 +95,9 @@ def get_keycloak_admin_from_config(config):
         config.get("security", {}).get("keycloak", {}).get("initial_root_password", ""),
     )
 
-    should_verify_tls = config.get("certificate", {}).get("type", "") != "self-signed"
+    verify_tls_ = verify_tls
+    if verify_tls is None:
+        verify_tls_ = config.get("certificate", {}).get("type", "") != "self-signed"
 
     try:
         keycloak_admin = keycloak.KeycloakAdmin(
@@ -105,7 +107,7 @@ def get_keycloak_admin_from_config(config):
             realm_name=os.environ.get("KEYCLOAK_REALM", "nebari"),
             user_realm_name="master",
             auto_refresh_token=("get", "put", "post", "delete"),
-            verify=should_verify_tls,
+            verify=verify_tls_,
         )
     except (
         keycloak.exceptions.KeycloakConnectionError,
