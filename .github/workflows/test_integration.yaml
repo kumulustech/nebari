@@ -17,8 +17,8 @@ jobs:
       matrix:
         provider:
           - aws
-#          - do
-#          - gcp
+          - do
+          - gcp
       fail-fast: false
     steps:
       - name: "Checkout Infrastructure"
@@ -86,10 +86,10 @@ jobs:
           echo "SPACES_SECRET_ACCESS_KEY=${{ secrets.SPACES_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
           echo "NEBARI_K8S_VERSION"=1.25.12-do.0 >> $GITHUB_ENV
 
-#      - name: Integration Tests
-#        run: |
-#          pytest --version
-#          pytest tests/tests_integration/ -vvv -s -m ${{ matrix.provider }}
+      - name: Integration Tests
+        run: |
+          pytest --version
+          pytest tests/tests_integration/ -vvv -s -m ${{ matrix.provider }}
 
       - name: Cloud Nuke AWS
         if: ${{ matrix.provider == 'aws' && always()}}
