@@ -1,4 +1,5 @@
 import enum
+from typing import Callable
 
 import pydantic
 from ruamel.yaml import yaml_object
@@ -21,6 +22,11 @@ class Base(pydantic.BaseModel):
         extra = "forbid"
         validate_assignment = True
         allow_population_by_field_name = True
+
+
+class PostDeployHook(Base):
+    name: str
+    callback: Callable
 
 
 @yaml_object(yaml)

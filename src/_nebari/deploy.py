@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 def deploy_configuration(
     config: schema.Main,
     stages: List[hookspecs.NebariStage],
+    post_deploy_hooks: List[schema.PostDeployHook],
     dns_provider,
     dns_auto_provision,
     disable_prompt: bool = False,
@@ -57,6 +58,11 @@ def deploy_configuration(
 
                 if not disable_checks:
                     s.check(stage_outputs)
+
+                for post_deploy_hook in post_deploy_hooks:
+                    if post_deploy_hook.name == stage.name:
+                        post_deploy_hook.callback(stage.name)
+
         print("Nebari deployed successfully")
 
         print("Services:")
