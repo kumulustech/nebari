@@ -188,9 +188,6 @@ def tfimport(addr, id, directory=None, var_files=None, exist_ok=False):
     var_files = var_files or []
 
     existing_resources = state_list(directory)
-    print("*" * 80)
-    print("existing_resources", existing_resources)
-    print("*" * 80)
 
     if existing_resources is None:
         logger.warn("Unable to get existing resources from Terraform state.")
@@ -198,8 +195,7 @@ def tfimport(addr, id, directory=None, var_files=None, exist_ok=False):
 
     if addr in existing_resources:
         logger.info(f"Resource {addr} already imported.")
-        if not exist_ok:
-            return
+        return
 
     logger.info(
         f"Importing Terraform resource. directory={directory}, addr={addr}, id={id}"
