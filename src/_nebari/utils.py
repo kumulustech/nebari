@@ -57,7 +57,7 @@ def run_subprocess_cmd(processargs, capture_output=False, **kwargs):
 
     strip_errors = kwargs.pop("strip_errors", False)
 
-    stdout_pipe = subprocess.PIPE if capture_output else None
+    stdout_pipe = subprocess.PIPE
 
     process = subprocess.Popen(
         processargs,
