@@ -36,6 +36,7 @@ resource "azurerm_kubernetes_cluster" "main" {
     node_labels = {
       "azure-node-pool" = var.node_groups[0].name
     }
+    tags = var.tags
   }
 
   sku_tier = "Free" # "Free" [Default] or "Paid"
