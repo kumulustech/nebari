@@ -62,6 +62,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "user_node_group" {
   }
   orchestrator_version = var.kubernetes_version
   tags                 = var.tags
+  vnet_subnet_id       = var.vnet_subnet_id
+
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "worker_node_group" {
@@ -78,4 +80,5 @@ resource "azurerm_kubernetes_cluster_node_pool" "worker_node_group" {
   }
   orchestrator_version = var.kubernetes_version
   tags                 = var.tags
+  vnet_subnet_id       = var.vnet_subnet_id
 }
