@@ -11,7 +11,16 @@ resource "azurerm_kubernetes_cluster" "main" {
   node_resource_group     = var.node_resource_group_name
   private_cluster_enabled = var.private_cluster_enabled
 
-  network_profile = var.network_profile
+  dynamic "network_profile" {
+    for_each = var.network_profile != null ? [var.network_profile] : []
+    content {
+      network_plugin     = network_profile.value.network_plugin != null ? network_profile.value.network_plugin : null
+      network_policy     = network_profile.value.network_policy != null ? network_profile.value.network_policy : null
+      service_cidr       = network_profile.value.service_cidr != null ? network_profile.value.service_cidr : null
+      dns_service_ip     = network_profile.value.dns_service_ip != null ? network_profile.value.dns_service_ip : null
+      docker_bridge_cidr = network_profile.value.docker_bridge_cidr != null ? network_profile.value.docker_bridge_cidr : null
+    }
+  }
 
   kubernetes_version = var.kubernetes_version
   default_node_pool {
