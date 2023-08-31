@@ -67,6 +67,10 @@ def run_subprocess_cmd(processargs, capture_output=False, **kwargs):
         **kwargs,
     )
 
+    if process.stdout is None:
+        print("Stdout pipe is not available")
+        return -1  # or raise an exception
+
     output = None
     if capture_output:
         output = []
