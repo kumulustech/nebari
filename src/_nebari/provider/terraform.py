@@ -166,12 +166,40 @@ def output(directory=None):
         )
 
 
+def state_list(directory=None):
+    command = ["state", "list"]
+    logger.info(f"terraform state list directory={directory}")
+    try:
+        output = run_terraform_subprocess(
+            command, cwd=directory, capture_output=True, text=True
+        )
+        resources = output.splitlines()
+        return resources
+    except TerraformException as e:
+        logger.error(f"Error executing Terraform state list: {e}")
+        return None
+
+
 def tfimport(addr, id, directory=None, var_files=None, exist_ok=False):
     var_files = var_files or []
 
-    logger.info(f"terraform import directory={directory} addr={addr} id={id}")
+    existing_resources = state_list(directory)
+    if existing_resources is None:
+        logger.warn("Unable to get existing resources from Terraform state.")
+        return
+
+    if addr in existing_resources:
+        logger.info(f"Resource {addr} already imported.")
+        if not exist_ok:
+            return
+
+    logger.info(
+        f"Importing Terraform resource. directory={directory}, addr={addr}, id={id}"
+    )
+
     command = ["import"] + ["-var-file=" + _ for _ in var_files] + [addr, id]
     logger.error(str(command))
+
     with timer(logger, "terraform import"):
         try:
             run_terraform_subprocess(
