@@ -779,7 +779,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 vnet_subnet_id=self.config.azure.vnet_subnet_id,
                 private_cluster_enabled=self.config.azure.private_cluster_enabled,
                 tags=self.config.azure.tags,
-                network_profile=self.azure.network_profile,
+                network_profile=self.config.azure.network_profile,
             ).dict()
         elif self.config.provider == schema.ProviderEnum.aws:
             return AWSInputVars(
