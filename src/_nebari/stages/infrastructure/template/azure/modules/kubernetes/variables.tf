@@ -53,7 +53,7 @@ variable "tags" {
   default     = {}
 }
 
-variables "network_profile" {
+variable "network_profile" {
   description = "Network profile"
   type = object({
     network_plugin     = string
