@@ -62,4 +62,5 @@ variable "network_profile" {
     dns_service_ip     = string
     docker_bridge_cidr = string
   })
+  default = null
 }

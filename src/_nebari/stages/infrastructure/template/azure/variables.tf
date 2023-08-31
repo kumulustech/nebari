@@ -59,6 +59,30 @@ variable "tags" {
   default     = {}
 }
 
+vvariable "network_plugin" {
+  description = "Network plugin used for building Kubernetes network."
+  type        = string
+  default     = null
+}
+
+variable "network_policy" {
+  description = "Network policy to use."
+  type        = string
+  default     = null
+}
+
+variable "service_cidr" {
+  description = "CIDR block for the Kubernetes service."
+  type        = string
+  default     = null
+}
+
+variable "dns_service_ip" {
+  description = "IP within the service CIDR for DNS services."
+  type        = string
+  default     = null
+}
+
 variable "network_profile" {
   description = "Network profile"
   type = object({
@@ -68,4 +92,5 @@ variable "network_profile" {
     dns_service_ip     = string
     docker_bridge_cidr = string
   })
+  default = null
 }
