@@ -58,3 +58,14 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variables "network_profile" {
+  description = "Network profile"
+  type = object({
+    network_plugin     = string
+    network_policy     = string
+    service_cidr       = string
+    dns_service_ip     = string
+    docker_bridge_cidr = string
+  })
+}

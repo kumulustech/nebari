@@ -11,6 +11,8 @@ resource "azurerm_kubernetes_cluster" "main" {
   node_resource_group     = var.node_resource_group_name
   private_cluster_enabled = var.private_cluster_enabled
 
+  network_profile = var.network_profile
+
   kubernetes_version = var.kubernetes_version
   default_node_pool {
     vnet_subnet_id      = var.vnet_subnet_id
