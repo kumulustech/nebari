@@ -44,7 +44,8 @@ def change_directory(directory):
     os.chdir(current_directory)
 
 
-def run_subprocess_cmd(processargs, capture_output=False, **kwargs):
+def run_subprocess_cmd(processargs, **kwargs):
+    """Runs subprocess command with realtime stdout logging with optional line prefix."""
     if "prefix" in kwargs:
         line_prefix = f"[{kwargs['prefix']}]: ".encode("utf-8")
         kwargs.pop("prefix")
@@ -57,24 +58,13 @@ def run_subprocess_cmd(processargs, capture_output=False, **kwargs):
 
     strip_errors = kwargs.pop("strip_errors", False)
 
-    stdout_pipe = subprocess.PIPE
-
     process = subprocess.Popen(
         processargs,
-        stdout=stdout_pipe,
-        stderr=subprocess.STDOUT if capture_output else None,
-        preexec_fn=os.setsid,
         **kwargs,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        preexec_fn=os.setsid,
     )
-
-    if process.stdout is None:
-        print("Stdout pipe is not available")
-        return -1  # or raise an exception
-
-    output = None
-    if capture_output:
-        output = []
-
     # Set timeout thread
     timeout_timer = None
     if timeout > 0:
@@ -90,30 +80,23 @@ def run_subprocess_cmd(processargs, capture_output=False, **kwargs):
 
     for line in iter(lambda: process.stdout.readline(), b""):
         full_line = line_prefix + line
-        if capture_output:
-            output.append(full_line.decode("utf-8").strip())
-        else:
-            if strip_errors:
-                full_line = full_line.decode("utf-8")
-                full_line = re.sub(
-                    r"\x1b\[31m", "", full_line
-                )  # Remove red ANSI escape code
-                full_line = full_line.encode("utf-8")
+        if strip_errors:
+            full_line = full_line.decode("utf-8")
+            full_line = re.sub(
+                r"\x1b\[31m", "", full_line
+            )  # Remove red ANSI escape code
+            full_line = full_line.encode("utf-8")
 
-            sys.stdout.buffer.write(full_line)
-            sys.stdout.flush()
+        sys.stdout.buffer.write(full_line)
+        sys.stdout.flush()
 
     if timeout_timer is not None:
         timeout_timer.cancel()
 
     process.stdout.close()
-    return_code = process.wait(timeout=10)
-    if capture_output:
-        return "\n".join(output)
-    else:
-        return (
-            return_code  # Should already have finished because we have drained stdout
-        )
+    return process.wait(
+        timeout=10
+    )  # Should already have finished because we have drained stdout
 
 
 def load_yaml(config_filename: Path):

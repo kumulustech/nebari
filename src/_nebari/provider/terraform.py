@@ -167,16 +167,20 @@ def output(directory=None):
 
 
 def state_list(directory=None):
-    command = ["state", "list"]
-    logger.info(f"terraform state list directory={directory}")
+    terraform_path = download_terraform_binary()
+    command = [terraform_path, "state", "list"]
+
+    logger.info(f"Running terraform state list in directory={directory}")
+
     try:
-        output = run_terraform_subprocess(
-            command, cwd=directory, capture_output=True, text=True
+        completed_process = subprocess.run(
+            command, cwd=directory, capture_output=True, text=True, check=True
         )
+        output = completed_process.stdout
         resources = output.splitlines()
         return resources
-    except TerraformException as e:
-        logger.error(f"Error executing Terraform state list: {e}")
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error executing Terraform state list: {e.stderr}")
         return None
 
 
