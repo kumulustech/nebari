@@ -70,3 +70,9 @@ variable "network_profile" {
   })
   default = null
 }
+
+variable "max_pods" {
+  description = "Maximum number of pods that can run on a node"
+  type        = number
+  default     = 60
+}

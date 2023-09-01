@@ -117,6 +117,7 @@ class AzureInputVars(schema.Base):
     private_cluster_enabled: bool
     tags: Dict[str, str] = {}
     network_profile: Dict[str, str] = None
+    max_pods: int = None
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -389,6 +390,7 @@ class AzureProvider(schema.Base):
     resource_group_name: typing.Optional[str] = None
     tags: typing.Optional[typing.Dict[str, str]] = {}
     network_profile: typing.Optional[typing.Dict[str, str]] = None
+    max_pods: typing.Optional[int] = None
 
     @pydantic.validator("kubernetes_version")
     def _validate_kubernetes_version(cls, value):
@@ -777,6 +779,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 private_cluster_enabled=self.config.azure.private_cluster_enabled,
                 tags=self.config.azure.tags,
                 network_profile=self.config.azure.network_profile,
+                max_pods=self.config.azure.max_pods,
             ).dict()
         elif self.config.provider == schema.ProviderEnum.aws:
             return AWSInputVars(

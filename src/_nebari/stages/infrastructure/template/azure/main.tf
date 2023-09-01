@@ -27,6 +27,7 @@ module "kubernetes" {
   node_resource_group_name = var.node_resource_group_name
   kubernetes_version       = var.kubernetes_version
   tags                     = var.tags
+  max_pods                 = var.max_pods
 
   network_profile = var.network_profile
 

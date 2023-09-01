@@ -3,6 +3,8 @@ resource "azurerm_kubernetes_cluster" "main" {
   name                = var.name
   location            = var.location
   resource_group_name = var.resource_group_name
+  tags                = var.tags
+
 
   # DNS prefix specified when creating the managed cluster. Changing this forces a new resource to be created.
   dns_prefix = "Nebari" # required
@@ -10,6 +12,7 @@ resource "azurerm_kubernetes_cluster" "main" {
   # Azure requires that a new, non-existent Resource Group is used, as otherwise the provisioning of the Kubernetes Service will fail.
   node_resource_group     = var.node_resource_group_name
   private_cluster_enabled = var.private_cluster_enabled
+  max_pods                = var.max_pods
 
   dynamic "network_profile" {
     for_each = var.network_profile != null ? [var.network_profile] : []
@@ -31,6 +34,7 @@ resource "azurerm_kubernetes_cluster" "main" {
     enable_auto_scaling = "true"
     min_count           = 1
     max_count           = 1
+    max_pods            = var.max_pods
     # node_labels          = var.node_labels
     orchestrator_version = var.kubernetes_version
     node_labels = {
@@ -44,8 +48,6 @@ resource "azurerm_kubernetes_cluster" "main" {
   identity {
     type = "SystemAssigned" # "UserAssigned" or "SystemAssigned".  SystemAssigned identity lifecycles are tied to the AKS Cluster.
   }
-
-  tags = var.tags
 }
 
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
@@ -58,6 +60,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "user_node_group" {
   mode                  = "User" # "System" or "User", only "User" nodes can scale down to 0
   min_count             = var.node_groups[1].min_size
   max_count             = var.node_groups[1].max_size
+  max_pods              = var.max_pods
   node_labels = {
     "azure-node-pool" = var.node_groups[1].name
   }
@@ -76,6 +79,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "worker_node_group" {
   mode                  = "User" # "System" or "User", only "User" nodes can scale down to 0
   min_count             = var.node_groups[2].min_size
   max_count             = var.node_groups[2].max_size
+  max_pods              = var.max_pods
   node_labels = {
     "azure-node-pool" = var.node_groups[2].name
   }
