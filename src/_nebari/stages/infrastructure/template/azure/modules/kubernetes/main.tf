@@ -12,7 +12,6 @@ resource "azurerm_kubernetes_cluster" "main" {
   # Azure requires that a new, non-existent Resource Group is used, as otherwise the provisioning of the Kubernetes Service will fail.
   node_resource_group     = var.node_resource_group_name
   private_cluster_enabled = var.private_cluster_enabled
-  max_pods                = var.max_pods
 
   dynamic "network_profile" {
     for_each = var.network_profile != null ? [var.network_profile] : []
