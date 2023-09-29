@@ -1,9 +1,5 @@
 terraform {
   required_providers {
-    keycloak = {
-      source  = "mrparkers/keycloak"
-      version = "3.7.0"
-    }
   }
 }
 
@@ -59,7 +55,7 @@ resource "kubernetes_deployment" "nebari-extension-deployment" {
           }
 
           dynamic "env" {
-            for_each = concat(local.oauth2client_envs, local.keycloakadmin_envs, local.jwt_envs, var.envs)
+            for_each = concat(var.envs)
             content {
               name  = env.value["name"]
               value = env.value["value"]
@@ -94,10 +90,4 @@ resource "kubernetes_deployment" "nebari-extension-deployment" {
       }
     }
   }
-}
-
-resource "random_password" "nebari-jwt-secret" {
-  count   = var.jwt ? 1 : 0
-  length  = 32
-  special = false
 }

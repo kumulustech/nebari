@@ -38,6 +38,7 @@ class ProviderEnum(str, enum.Enum):
     aws = "aws"
     gcp = "gcp"
     azure = "azure"
+    oci = "oci"
 
     @classmethod
     def to_yaml(cls, representer, node):

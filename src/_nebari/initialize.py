@@ -16,10 +16,8 @@ from _nebari.provider.cloud import (
     digital_ocean,
     google_cloud,
 )
-from _nebari.provider.oauth.auth0 import create_client
 from _nebari.stages.bootstrap import CiEnum
 from _nebari.stages.kubernetes_ingress import CertificateEnum
-from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
 from _nebari.utils import get_latest_kubernetes_version, random_secure_string
 from _nebari.version import __version__
@@ -36,10 +34,8 @@ def render_config(
     cloud_provider: ProviderEnum = ProviderEnum.local,
     ci_provider: CiEnum = CiEnum.none,
     repository: str = None,
-    auth_provider: AuthenticationEnum = AuthenticationEnum.password,
     namespace: str = "dev",
     repository_auto_provision: bool = False,
-    auth_auto_provision: bool = False,
     terraform_state: TerraformStateEnum = TerraformStateEnum.remote,
     kubernetes_version: str = None,
     region: str = None,
@@ -62,53 +58,6 @@ def render_config(
     config["ci_cd"] = {"type": ci_provider}
     config["terraform_state"] = {"type": terraform_state}
 
-    # Save default password to file
-    default_password_filename = Path(tempfile.gettempdir()) / "NEBARI_DEFAULT_PASSWORD"
-    config["security"] = {
-        "keycloak": {"initial_root_password": random_secure_string(length=32)}
-    }
-    with default_password_filename.open("w") as f:
-        f.write(config["security"]["keycloak"]["initial_root_password"])
-    default_password_filename.chmod(0o700)
-
-    config["theme"] = {"jupyterhub": {"hub_title": f"Nebari - { project_name }"}}
-    config["theme"]["jupyterhub"][
-        "welcome"
-    ] = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
-
-    config["security"]["authentication"] = {"type": auth_provider}
-
-    if auth_provider == AuthenticationEnum.github:
-        config["security"]["authentication"]["config"] = {
-            "client_id": os.environ.get(
-                "GITHUB_CLIENT_ID",
-                "<enter client id or remove to use GITHUB_CLIENT_ID environment variable (preferred)>",
-            ),
-            "client_secret": os.environ.get(
-                "GITHUB_CLIENT_SECRET",
-                "<enter client secret or remove to use GITHUB_CLIENT_SECRET environment variable (preferred)>",
-            ),
-        }
-    elif auth_provider == AuthenticationEnum.auth0:
-        if auth_auto_provision:
-            auth0_config = create_client(config.domain, config.project_name)
-            config["security"]["authentication"]["config"] = auth0_config
-        else:
-            config["security"]["authentication"]["config"] = {
-                "client_id": os.environ.get(
-                    "AUTH0_CLIENT_ID",
-                    "<enter client id or remove to use AUTH0_CLIENT_ID environment variable (preferred)>",
-                ),
-                "client_secret": os.environ.get(
-                    "AUTH0_CLIENT_SECRET",
-                    "<enter client secret or remove to use AUTH0_CLIENT_SECRET environment variable (preferred)>",
-                ),
-                "auth0_subdomain": os.environ.get(
-                    "AUTH0_DOMAIN",
-                    "<enter subdomain (without .auth0.com) or remove to use AUTH0_DOMAIN environment variable>",
-                ),
-            }
-
     if cloud_provider == ProviderEnum.do:
         do_region = region or constants.DO_DEFAULT_REGION
         do_kubernetes_versions = kubernetes_version or get_latest_kubernetes_version(
@@ -118,10 +67,6 @@ def render_config(
             "kubernetes_version": do_kubernetes_versions,
             "region": do_region,
         }
-
-        config["theme"]["jupyterhub"][
-            "hub_subtitle"
-        ] = f"{WELCOME_HEADER_TEXT} on Digital Ocean"
 
     elif cloud_provider == ProviderEnum.gcp:
         gcp_region = region or constants.GCP_DEFAULT_REGION
@@ -133,9 +78,6 @@ def render_config(
             "region": gcp_region,
         }
 
-        config["theme"]["jupyterhub"][
-            "hub_subtitle"
-        ] = f"{WELCOME_HEADER_TEXT} on Google Cloud Platform"
         if "PROJECT_ID" in os.environ:
             config["google_cloud_platform"]["project"] = os.environ["PROJECT_ID"]
         elif not disable_prompt:
@@ -154,10 +96,6 @@ def render_config(
             "storage_account_postfix": random_secure_string(length=4),
         }
 
-        config["theme"]["jupyterhub"][
-            "hub_subtitle"
-        ] = f"{WELCOME_HEADER_TEXT} on Azure"
-
     elif cloud_provider == ProviderEnum.aws:
         aws_region = (
             region
@@ -171,15 +109,6 @@ def render_config(
             "kubernetes_version": aws_kubernetes_version,
             "region": aws_region,
         }
-        config["theme"]["jupyterhub"][
-            "hub_subtitle"
-        ] = f"{WELCOME_HEADER_TEXT} on Amazon Web Services"
-
-    elif cloud_provider == ProviderEnum.existing:
-        config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
-
-    elif cloud_provider == ProviderEnum.local:
-        config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
 
     if ssl_cert_email:
         config["certificate"] = {"type": CertificateEnum.letsencrypt.value}

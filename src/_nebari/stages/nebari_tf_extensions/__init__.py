@@ -21,8 +21,6 @@ class NebariExtension(schema.Base):
     image: str
     urlslug: str
     private: bool = False
-    oauth2client: bool = False
-    keycloakadmin: bool = False
     jwt: bool = False
     nebariconfigyaml: bool = False
     logout: typing.Optional[str]
@@ -64,14 +62,8 @@ class NebariTFExtensionsStage(NebariTerraformStage):
         return {
             "environment": self.config.namespace,
             "endpoint": self.config.domain,
-            "realm_id": stage_outputs["stages/06-kubernetes-keycloak-configuration"][
-                "realm_id"
-            ]["value"],
             "tf_extensions": [_.dict() for _ in self.config.tf_extensions],
             "nebari_config_yaml": self.config.dict(),
-            "keycloak_nebari_bot_password": stage_outputs[
-                "stages/05-kubernetes-keycloak"
-            ]["keycloak_nebari_bot_password"]["value"],
             "helm_extensions": [_.dict() for _ in self.config.helm_extensions],
         }
 

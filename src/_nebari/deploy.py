@@ -65,10 +65,6 @@ def deploy_configuration(
         print(
             f"Kubernetes kubeconfig located at file://{stage_outputs['stages/02-infrastructure']['kubeconfig_filename']['value']}"
         )
-        username = "root"
-        password = config.security.keycloak.initial_root_password
-        if password:
-            print(f"Kubecloak master realm username={username} password={password}")
 
         print(
             "Additional administration docs can be found at https://docs.nebari.dev/en/stable/source/admin_guide/"

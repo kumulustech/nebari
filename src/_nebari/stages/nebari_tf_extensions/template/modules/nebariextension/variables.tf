@@ -29,18 +29,6 @@ variable "private" {
   default     = true
 }
 
-variable "oauth2client" {
-  description = "Create a Keycloak client and include env vars"
-  type        = bool
-  default     = false
-}
-
-variable "keycloakadmin" {
-  description = "Include env vars for a keycloak admin user to make Keycloak Admin API calls"
-  type        = bool
-  default     = false
-}
-
 variable "jwt" {
   description = "Create secret and cookie name for JWT, set as env vars"
   type        = bool
@@ -57,16 +45,4 @@ variable "envs" {
   description = "List of env var objects"
   type        = list(map(any))
   default     = []
-}
-
-variable "nebari-realm-id" {
-  description = "Keycloak nebari realm id"
-  type        = string
-  default     = ""
-}
-
-variable "keycloak_nebari_bot_password" {
-  description = "Keycloak client password"
-  type        = string
-  default     = ""
 }

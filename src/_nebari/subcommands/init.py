@@ -24,7 +24,6 @@ from _nebari.provider.cloud import (
     google_cloud,
 )
 from _nebari.stages.bootstrap import CiEnum
-from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
 from _nebari.utils import get_latest_kubernetes_version
 from nebari import schema
@@ -48,8 +47,6 @@ CREATE_DO_CREDS = (
     "https://docs.digitalocean.com/reference/api/create-personal-access-token"
 )
 CREATE_AZURE_CREDS = "https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_secret#creating-a-service-principal-in-the-azure-portal"
-CREATE_AUTH0_CREDS = "https://auth0.com/docs/get-started/auth0-overview/create-applications/machine-to-machine-apps"
-CREATE_GITHUB_OAUTH_CREDS = "https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app"
 AWS_REGIONS = "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-regions"
 GCP_REGIONS = "https://cloud.google.com/compute/docs/regions-zones"
 AZURE_REGIONS = "https://azure.microsoft.com/en-us/explore/global-infrastructure/geographies/#overview"
@@ -86,8 +83,6 @@ class InitInputs(schema.Base):
     project_name: schema.project_name_pydantic = ""
     domain_name: typing.Optional[str] = None
     namespace: typing.Optional[schema.namespace_pydantic] = "dev"
-    auth_provider: AuthenticationEnum = AuthenticationEnum.password
-    auth_auto_provision: bool = False
     repository: typing.Optional[schema.github_url_pydantic] = None
     repository_auto_provision: bool = False
     ci_provider: CiEnum = CiEnum.none
@@ -128,8 +123,6 @@ def handle_init(inputs: InitInputs, config_schema: BaseModel):
         project_name=inputs.project_name,
         nebari_domain=inputs.domain_name,
         namespace=inputs.namespace,
-        auth_provider=inputs.auth_provider,
-        auth_auto_provision=inputs.auth_auto_provision,
         ci_provider=inputs.ci_provider,
         repository=inputs.repository,
         repository_auto_provision=inputs.repository_auto_provision,
@@ -194,68 +187,6 @@ def questionary_validate_regex(regex: str, error_message: str = None):
     return callback
 
 
-def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
-    """Validate the the necessary auth provider credentials have been set as environment variables."""
-    if ctx.params.get("disable_prompt"):
-        return auth_provider.lower()
-
-    auth_provider = auth_provider.lower()
-
-    # Auth0
-    if auth_provider == AuthenticationEnum.auth0.value.lower() and (
-        not os.environ.get("AUTH0_CLIENT_ID")
-        or not os.environ.get("AUTH0_CLIENT_SECRET")
-        or not os.environ.get("AUTH0_DOMAIN")
-    ):
-        rich.print(
-            MISSING_CREDS_TEMPLATE.format(
-                provider="Auth0", link_to_docs=CREATE_AUTH0_CREDS
-            )
-        )
-
-        if not os.environ.get("AUTH0_CLIENT_ID"):
-            os.environ["AUTH0_CLIENT_ID"] = typer.prompt(
-                "Paste your AUTH0_CLIENT_ID",
-                hide_input=True,
-            )
-
-        if not os.environ.get("AUTH0_CLIENT_SECRET"):
-            os.environ["AUTH0_CLIENT_SECRET"] = typer.prompt(
-                "Paste your AUTH0_CLIENT_SECRET",
-                hide_input=True,
-            )
-
-        if not os.environ.get("AUTH0_DOMAIN"):
-            os.environ["AUTH0_DOMAIN"] = typer.prompt(
-                "Paste your AUTH0_DOMAIN",
-                hide_input=True,
-            )
-
-    # GitHub
-    elif auth_provider == AuthenticationEnum.github.value.lower() and (
-        not os.environ.get("GITHUB_CLIENT_ID")
-        or not os.environ.get("GITHUB_CLIENT_SECRET")
-    ):
-        rich.print(
-            MISSING_CREDS_TEMPLATE.format(
-                provider="GitHub OAuth App", link_to_docs=CREATE_GITHUB_OAUTH_CREDS
-            )
-        )
-
-        if not os.environ.get("GITHUB_CLIENT_ID"):
-            os.environ["GITHUB_CLIENT_ID"] = typer.prompt(
-                "Paste your GITHUB_CLIENT_ID",
-                hide_input=True,
-            )
-
-        if not os.environ.get("GITHUB_CLIENT_SECRET"):
-            os.environ["GITHUB_CLIENT_SECRET"] = typer.prompt(
-                "Paste your GITHUB_CLIENT_SECRET",
-                hide_input=True,
-            )
-
-    return auth_provider
-
 
 def check_cloud_provider_creds(cloud_provider: ProviderEnum, disable_prompt: bool):
     """Validate that the necessary cloud credentials have been set as environment variables."""
@@ -264,24 +195,25 @@ def check_cloud_provider_creds(cloud_provider: ProviderEnum, disable_prompt: boo
         return cloud_provider.lower()
 
     # AWS
-    if cloud_provider == ProviderEnum.aws.value.lower() and (
-        not os.environ.get("AWS_ACCESS_KEY_ID")
-        or not os.environ.get("AWS_SECRET_ACCESS_KEY")
-    ):
-        rich.print(
-            MISSING_CREDS_TEMPLATE.format(
-                provider="Amazon Web Services", link_to_docs=CREATE_AWS_CREDS
-            )
-        )
+    # Don't check AWS, using SSO credentials which boto understands
+    # if cloud_provider == ProviderEnum.aws.value.lower() and (
+    #     not os.environ.get("AWS_ACCESS_KEY_ID")
+    #     or not os.environ.get("AWS_SECRET_ACCESS_KEY")
+    # ):
+    #     rich.print(
+    #         MISSING_CREDS_TEMPLATE.format(
+    #             provider="Amazon Web Services", link_to_docs=CREATE_AWS_CREDS
+    #         )
+    #     )
 
-        os.environ["AWS_ACCESS_KEY_ID"] = typer.prompt(
-            "Paste your AWS_ACCESS_KEY_ID",
-            hide_input=True,
-        )
-        os.environ["AWS_SECRET_ACCESS_KEY"] = typer.prompt(
-            "Paste your AWS_SECRET_ACCESS_KEY",
-            hide_input=True,
-        )
+    #     os.environ["AWS_ACCESS_KEY_ID"] = typer.prompt(
+    #         "Paste your AWS_ACCESS_KEY_ID",
+    #         hide_input=True,
+    #     )
+    #     os.environ["AWS_SECRET_ACCESS_KEY"] = typer.prompt(
+    #         "Paste your AWS_SECRET_ACCESS_KEY",
+    #         hide_input=True,
+    #     )
 
     # GCP
     elif cloud_provider == ProviderEnum.gcp.value.lower() and (
@@ -504,14 +436,7 @@ def nebari_subcommand(cli: typer.Typer):
             None,
             help="The region you want to deploy your Nebari cluster to (if deploying to the cloud)",
         ),
-        auth_provider: AuthenticationEnum = typer.Option(
-            AuthenticationEnum.password,
-            help=f"options: {enum_to_list(AuthenticationEnum)}",
-            callback=check_auth_provider_creds,
-        ),
-        auth_auto_provision: bool = typer.Option(
-            False,
-        ),
+
         repository: str = typer.Option(
             None,
             help="Github repository URL to be initialized with --repository-auto-provision",
@@ -583,8 +508,6 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.project_name = project_name
         inputs.domain_name = domain_name
         inputs.namespace = namespace
-        inputs.auth_provider = auth_provider
-        inputs.auth_auto_provision = auth_auto_provision
         inputs.repository = repository
         inputs.repository_auto_provision = repository_auto_provision
         inputs.ci_provider = ci_provider
@@ -724,41 +647,6 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             or None
         )
 
-        # AUTH PROVIDER
-        rich.print(
-            (
-                # TODO once docs are updated, add links for more details
-                "\n\n 🪴  Nebari comes with [green]Keycloak[/green], an open-source identity and access management tool. This is how users and permissions "
-                "are managed on the platform. To connect Keycloak with an identity provider, you can select one now.\n\n"
-                "\n\t❗️ [purple]password[/purple] is the default option and is not connected to any external identity provider.\n"
-            )
-        )
-        inputs.auth_provider = questionary.select(
-            "What authentication provider would you like?",
-            choices=enum_to_list(AuthenticationEnum),
-            qmark=qmark,
-        ).unsafe_ask()
-
-        if not disable_checks:
-            check_auth_provider_creds(ctx, auth_provider=inputs.auth_provider)
-
-        if inputs.auth_provider.lower() == AuthenticationEnum.auth0.value.lower():
-            inputs.auth_auto_provision = questionary.confirm(
-                "Would you like us to auto provision the Auth0 Machine-to-Machine app?",
-                default=False,
-                qmark=qmark,
-                auto_enter=False,
-            ).unsafe_ask()
-
-        elif inputs.auth_provider.lower() == AuthenticationEnum.github.value.lower():
-            rich.print(
-                (
-                    ":warning: If you haven't done so already, please ensure the following:\n"
-                    f"The `Homepage URL` is set to: [green]https://{inputs.domain_name}[/green]\n"
-                    f"The `Authorization callback URL` is set to: [green]https://{inputs.domain_name}/auth/realms/nebari/broker/github/endpoint[/green]\n\n"
-                )
-            )
-
         # GITOPS - REPOSITORY, CICD
         rich.print(
             (
@@ -773,7 +661,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             qmark=qmark,
             auto_enter=False,
         ).unsafe_ask():
-            repo_url = "http://{git_provider}/{org_name}/{repo_name}"
+            repo_url = "https://{git_provider}/{org_name}/{repo_name}"
 
             git_provider = questionary.select(
                 "Which git provider would you like to use?",

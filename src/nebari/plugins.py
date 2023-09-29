@@ -18,7 +18,6 @@ DEFAULT_SUBCOMMAND_PLUGINS = [
     "_nebari.subcommands.dev",
     "_nebari.subcommands.deploy",
     "_nebari.subcommands.destroy",
-    "_nebari.subcommands.keycloak",
     "_nebari.subcommands.render",
     "_nebari.subcommands.support",
     "_nebari.subcommands.upgrade",
@@ -32,8 +31,6 @@ DEFAULT_STAGES_PLUGINS = [
     "_nebari.stages.infrastructure",
     "_nebari.stages.kubernetes_initialize",
     "_nebari.stages.kubernetes_ingress",
-    "_nebari.stages.kubernetes_keycloak",
-    "_nebari.stages.kubernetes_keycloak_configuration",
     "_nebari.stages.kubernetes_services",
     "_nebari.stages.nebari_tf_extensions",
 ]

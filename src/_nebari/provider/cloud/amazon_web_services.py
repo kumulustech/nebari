@@ -37,24 +37,27 @@ def aws_session(region: str = None, digitalocean_region: str = None) -> boto3.Se
         region = digitalocean_region
         aws_session_token = None
     else:
-        check_credentials()
-        aws_access_key_id = os.environ["AWS_ACCESS_KEY_ID"]
-        aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"]
-        aws_session_token = os.environ.get("AWS_SESSION_TOKEN")
-
         if not region:
             raise ValueError(
                 "Please specify `region` in the nebari-config.yaml or if initializing the nebari-config, set the region via the "
                 "`--region` flag or via the AWS_DEFAULT_REGION environment variable.\n"
             )
-
-    return boto3.Session(
-        region_name=region,
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key,
-        aws_session_token=aws_session_token,
-    )
-
+    
+    if os.getenv('AWS_ACCESS_KEY_ID') is not None:
+        check_credentials()
+        aws_access_key_id = os.environ["AWS_ACCESS_KEY_ID"]
+        aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"]
+        aws_session_token = os.environ.get("AWS_SESSION_TOKEN")
+        return boto3.Session(
+            region_name=region,
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+        )
+    else:
+        return boto3.Session(
+            region_name=region,
+        )
 
 @functools.lru_cache()
 def regions(region: str) -> Dict[str, str]:

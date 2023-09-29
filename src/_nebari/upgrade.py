@@ -298,81 +298,6 @@ class Upgrade_0_4_0(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
-        """
-        Upgrade to Keycloak.
-        """
-        security = config.get("security", {})
-        users = security.get("users", {})
-        groups = security.get("groups", {})
-
-        # Custom Authenticators are no longer allowed
-        if (
-            config.get("security", {}).get("authentication", {}).get("type", "")
-            == "custom"
-        ):
-            customauth_warning = (
-                f"Custom Authenticators are no longer supported in {self.version} because Keycloak "
-                "manages all authentication.\nYou need to find a way to support your authentication "
-                "requirements within Keycloak."
-            )
-            if not kwargs.get("attempt_fixes", False):
-                raise ValueError(
-                    f"{customauth_warning}\n\nRun `nebari upgrade --attempt-fixes` to switch to basic Keycloak authentication instead."
-                )
-            else:
-                rich.print(f"\nWARNING: {customauth_warning}")
-                rich.print(
-                    "\nSwitching to basic Keycloak authentication instead since you specified --attempt-fixes."
-                )
-                config["security"]["authentication"] = {"type": "password"}
-
-        # Create a group/user import file for Keycloak
-
-        realm_import_filename = config_filename.parent / "nebari-users-import.json"
-
-        realm = {"id": "nebari", "realm": "nebari"}
-        realm["users"] = [
-            {
-                "username": k,
-                "enabled": True,
-                "groups": sorted(
-                    list(
-                        (
-                            {v.get("primary_group", "")}
-                            | set(v.get("secondary_groups", []))
-                        )
-                        - {""}
-                    )
-                ),
-            }
-            for k, v in users.items()
-        ]
-        realm["groups"] = [
-            {"name": k, "path": f"/{k}"}
-            for k, v in groups.items()
-            if k not in {"users", "admin"}
-        ]
-
-        backup_configuration(realm_import_filename)
-
-        with realm_import_filename.open("wt") as f:
-            json.dump(realm, f, indent=2)
-
-        rich.print(
-            f"\nSaving user/group import file [purple]{realm_import_filename}[/purple].\n\n"
-            "ACTION REQUIRED: You must import this file into the Keycloak admin webpage after you redeploy Nebari.\n"
-            "Visit the URL path /auth/ and login as 'root'. Under Manage, click Import and select this file.\n\n"
-            "Non-admin users will default to analyst group membership after the upgrade (no dask access), "
-            "so you may wish to promote some users into the developer group.\n"
-        )
-
-        if "users" in security:
-            del security["users"]
-        if "groups" in security:
-            if "users" in security["groups"]:
-                # Ensure the users default group is added to Keycloak
-                security["shared_users_group"] = True
-            del security["groups"]
 
         if "terraform_modules" in config:
             del config["terraform_modules"]
@@ -380,40 +305,10 @@ class Upgrade_0_4_0(UpgradeStep):
                 "Removing terraform_modules field from config as it is no longer used.\n"
             )
 
-        if "default_images" not in config:
-            config["default_images"] = {}
-
-        # Remove conda_store image from default_images
-        if "conda_store" in config["default_images"]:
-            del config["default_images"]["conda_store"]
-
-        # Remove dask_gateway image from default_images
-        if "dask_gateway" in config["default_images"]:
-            del config["default_images"]["dask_gateway"]
-
-        # Create root password
-        default_password = "".join(
-            secrets.choice(string.ascii_letters + string.digits) for i in range(16)
-        )
-        security.setdefault("keycloak", {})["initial_root_password"] = default_password
-
-        rich.print(
-            f"Generated default random password=[green]{default_password}[/green] for Keycloak root user (Please change at /auth/ URL path).\n"
-        )
-
         # project was never needed in Azure - it remained as PLACEHOLDER in earlier nebari inits!
         if "azure" in config:
             if "project" in config["azure"]:
                 del config["azure"]["project"]
-
-        # "oauth_callback_url" and "scope" not required in nebari-config.yaml
-        # for Auth0 and Github authentication
-        auth_config = config["security"]["authentication"].get("config", None)
-        if auth_config:
-            if "oauth_callback_url" in auth_config:
-                del auth_config["oauth_callback_url"]
-            if "scope" in auth_config:
-                del auth_config["scope"]
 
         # It is not safe to immediately redeploy without backing up data ready to restore data
         # since a new cluster will be created for the new version.
@@ -430,23 +325,6 @@ class Upgrade_0_4_1(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
-        """
-        Upgrade jupyterlab profiles.
-        """
-        rich.print("\nUpgrading jupyterlab profiles in order to specify access type:\n")
-
-        profiles_jupyterlab = config.get("profiles", {}).get("jupyterlab", [])
-        for profile in profiles_jupyterlab:
-            name = profile.get("display_name", "")
-
-            if "groups" in profile or "users" in profile:
-                profile["access"] = "yaml"
-            else:
-                profile["access"] = "all"
-
-            rich.print(
-                f"Setting access type of JupyterLab profile [green]{name}[/green] to [green]{profile['access']}[/green]"
-            )
         return config
 
 
@@ -456,31 +334,6 @@ class Upgrade_2023_4_2(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
-        """
-        Prompt users to delete Argo CRDs
-        """
-
-        kubectl_delete_argo_crds_cmd = "kubectl delete crds clusterworkflowtemplates.argoproj.io cronworkflows.argoproj.io workfloweventbindings.argoproj.io workflows.argoproj.io workflowtasksets.argoproj.io workflowtemplates.argoproj.io"
-
-        kubectl_delete_argo_sa_cmd = (
-            f"kubectl delete sa -n {config['namespace']} argo-admin argo-dev argo-view"
-        )
-
-        rich.print(
-            f"\n\n[bold cyan]Note:[/] Upgrading requires a one-time manual deletion of the Argo Workflows Custom Resource Definitions (CRDs) and service accounts. \n\n[red bold]Warning:  [link=https://{config['domain']}/argo/workflows]Workflows[/link] and [link=https://{config['domain']}/argo/workflows]CronWorkflows[/link] created before deleting the CRDs will be erased when the CRDs are deleted and will not be restored.[/red bold] \n\nThe updated CRDs will be installed during the next [cyan bold]nebari deploy[/cyan bold] step. Argo Workflows will not function after deleting the CRDs until the updated CRDs and service accounts are installed in the next nebari deploy. You must delete the Argo Workflows CRDs and service accounts before upgrading to {self.version} (or later) or the deploy step will fail.  Please delete them before proceeding by generating a kubeconfig (see [link=https://www.nebari.dev/docs/how-tos/debug-nebari/#generating-the-kubeconfig]docs[/link]), installing kubectl (see [link=https://www.nebari.dev/docs/how-tos/debug-nebari#installing-kubectl]docs[/link]), and running the following two commands:\n\n\t[cyan bold]{kubectl_delete_argo_crds_cmd} [/cyan bold]\n\n\t[cyan bold]{kubectl_delete_argo_sa_cmd} [/cyan bold]"
-            ""
-        )
-
-        continue_ = Prompt.ask(
-            "Have you deleted the Argo Workflows CRDs and service accounts? [y/N] ",
-            default="N",
-        )
-        if not continue_ == "y":
-            rich.print(
-                f"You must delete the Argo Workflows CRDs and service accounts before upgrading to [green]{self.version}[/green] (or later)."
-            )
-            exit()
-
         return config
 
 
@@ -490,19 +343,6 @@ class Upgrade_2023_7_2(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
-        argo = config.get("argo_workflows", {})
-        if argo.get("enabled"):
-            response = Prompt.ask(
-                f"\nDo you want to enable the [green][link={NEBARI_WORKFLOW_CONTROLLER_DOCS}]Nebari Workflow Controller[/link][/green], required for [green][link={ARGO_JUPYTER_SCHEDULER_REPO}]Argo-Jupyter-Scheduler[/link][green]? [Y/n] ",
-                default="Y",
-            )
-            if response.lower() in ["y", "yes", ""]:
-                argo["nebari_workflow_controller"] = {"enabled": True}
-
-        rich.print("\n ⚠️ Deprecation Warnings ⚠️")
-        rich.print(
-            f"-> [green]{self.version}[/green] is the last Nebari version that supports CDS Dashboards"
-        )
 
         return config
 
