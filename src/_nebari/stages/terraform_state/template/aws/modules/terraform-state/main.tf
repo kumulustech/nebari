@@ -1,11 +1,7 @@
-resource "aws_s3_bucket_versioning" "terraform-state" {
+resource "aws_s3_bucket" "terraform-state" {
   bucket = "${var.name}-terraform-state"
 
   force_destroy = true
-
-  versioning {
-    enabled = true
-  }
 
   tags = merge({ Name = "S3 remote terraform state store" }, var.tags)
 
@@ -13,6 +9,13 @@ resource "aws_s3_bucket_versioning" "terraform-state" {
     ignore_changes = [
       server_side_encryption_configuration,
     ]
+  }
+}
+resource "aws_s3_bucket_versioning" "terraform-state-s3-versioning" {
+  bucket = aws_s3_bucket.terraform-state.bucket.id
+
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 
