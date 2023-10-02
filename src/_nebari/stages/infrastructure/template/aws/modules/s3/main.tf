@@ -9,7 +9,7 @@ resource "aws_s3_bucket" "main" {
 }
 
 resource "aws_s3_bucket_versioning" "main-versioning" {
-  bucket = aws_s3_bucket.main.bucket.id
+  bucket = aws_s3_bucket.main.bucket
 
   versioning_configuration {
     status = "Enabled"
