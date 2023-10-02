@@ -63,15 +63,15 @@ module "registry-ecr" {
 
 
 # ====================== EFS =========================
-# module "efs" {
-#   source = "./modules/efs"
+module "efs" {
+  source = "./modules/efs"
 
-#   name = "${local.cluster_name}-jupyterhub-shared"
-#   tags = local.additional_tags
+  name = "${local.cluster_name}-jupyterhub-shared"
+  tags = local.additional_tags
 
-#   efs_subnets         = local.subnet_ids
-#   efs_security_groups = [local.security_group_id]
-# }
+  efs_subnets         = local.subnet_ids
+  efs_security_groups = [local.security_group_id]
+}
 
 
 # ==================== KUBERNETES =====================
