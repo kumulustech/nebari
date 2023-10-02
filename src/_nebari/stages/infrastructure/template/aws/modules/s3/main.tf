@@ -1,4 +1,4 @@
-resource "aws_s3_bucket" "main" {
+resource "aws_s3_bucket_versioning" "main" {
   bucket = var.name
   acl    = var.public ? "public-read" : "private"
 

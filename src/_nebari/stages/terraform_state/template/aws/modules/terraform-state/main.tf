@@ -1,4 +1,4 @@
-resource "aws_s3_bucket" "terraform-state" {
+resource "aws_s3_bucket_versioning" "terraform-state" {
   bucket = "${var.name}-terraform-state"
 
   force_destroy = true
