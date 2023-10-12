@@ -90,8 +90,8 @@ def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: 
     ):
         for i in range(num_attempts):
             try:
-                resolved_ip = socket.gethostbyname(domain_name)
-                if resolved_ip == ip:
+                resolved_ips = socket.gethostbyname_ex(domain_name)[2]
+                if ip in resolved_ips:
                     print(
                         f"DNS configured domain={domain_name} matches ingress ip={ip}"
                     )
