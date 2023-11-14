@@ -107,7 +107,9 @@ def gha_env_vars(config: schema.Main):
 
     if os.environ.get("NEBARI_GH_BRANCH"):
         env_vars["NEBARI_GH_BRANCH"] = "${{ secrets.NEBARI_GH_BRANCH }}"
-
+    elif config.provider == schema.ProviderEnum.aws:
+        # provider via OIDC SSO credentials
+        pass
     elif config.provider == schema.ProviderEnum.azure:
         env_vars["ARM_CLIENT_ID"] = "${{ secrets.ARM_CLIENT_ID }}"
         env_vars["ARM_CLIENT_SECRET"] = "${{ secrets.ARM_CLIENT_SECRET }}"
