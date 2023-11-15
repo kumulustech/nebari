@@ -221,16 +221,18 @@ def setup_python_step():
         },
     )
 
+
 def setup_aws():
     return GHA_job_step(
         name="Setup AWS credentials",
         uses="aws-actions/configure-aws-credentials@v3",
-        with={
-            "role-to-assume": "${{ secrets.AWS_ROLE_ARN }}"
-            "role-session-name": "GitHub_to_AWS_via_FederatedOIDC"
-            "aws-region": "${{ env.AWS_REGION }}"
+        with_={
+            "role-to-assume": "${{ secrets.AWS_ROLE_ARN }}",
+            "role-session-name": "GitHub_to_AWS_via_FederatedOIDC",
+            "aws-region": "${{ env.AWS_REGION }}",
         },
     )
+
 
 def setup_gcloud():
     return GHA_job_step(
