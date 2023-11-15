@@ -172,11 +172,12 @@ def github_auto_provision(config: pydantic.BaseModel, owner: str, repo: str):
             }:
                 github.update_secret(owner, repo, name, os.environ[name])
         elif config.provider == ProviderEnum.aws:
-            for name in {
-                "AWS_ACCESS_KEY_ID",
-                "AWS_SECRET_ACCESS_KEY",
-            }:
-                github.update_secret(owner, repo, name, os.environ[name])
+            pass
+            # for name in {
+            #     "AWS_ACCESS_KEY_ID",
+            #     "AWS_SECRET_ACCESS_KEY",
+            # }:
+            #     github.update_secret(owner, repo, name, os.environ[name])
         elif config.provider == ProviderEnum.gcp:
             github.update_secret(owner, repo, "PROJECT_ID", os.environ["PROJECT_ID"])
             with open(os.environ["GOOGLE_CREDENTIALS"]) as f:

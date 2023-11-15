@@ -204,7 +204,7 @@ def checkout_image_step():
         uses="actions/checkout@v3",
         with_={
             "token": GHA_job_steps_extras(
-                __root__="${{ secrets.REPOSITORY_ACCESS_TOKEN }}"
+                __root__="${{ secrets.GITHUB_TOKEN }}"
             )
         },
     )
@@ -320,7 +320,7 @@ def gen_nebari_linter(config):
         "PR_NUMBER": GHA_job_steps_extras(__root__="${{ github.event.number }}"),
         "REPO_NAME": GHA_job_steps_extras(__root__="${{ github.repository }}"),
         "GITHUB_TOKEN": GHA_job_steps_extras(
-            __root__="${{ secrets.REPOSITORY_ACCESS_TOKEN }}"
+            __root__="${{ secrets.GITHUB_TOKEN }}"
         ),
     }
 
