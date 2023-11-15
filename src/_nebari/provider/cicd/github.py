@@ -221,6 +221,16 @@ def setup_python_step():
         },
     )
 
+def setup_aws():
+    return GHA_job_step(
+        name="Setup AWS credentials",
+        uses="aws-actions/configure-aws-credentials@v3",
+        with={
+            "role-to-assume": "${{ secrets.AWS_ROLE_ARN }}"
+            "role-session-name": "GitHub_to_AWS_via_FederatedOIDC"
+            "aws-region": "${{ env.AWS_REGION }}"
+        },
+    )
 
 def setup_gcloud():
     return GHA_job_step(
@@ -249,6 +259,9 @@ def gen_nebari_ops(config):
 
     if config.provider == schema.ProviderEnum.gcp:
         gha_steps.append(setup_gcloud())
+    
+    if config.provider == schema.ProviderEnum.aws:
+        gha_steps.append(setup_aws())
 
     for step in config.ci_cd.before_script:
         gha_steps.append(GHA_job_step(**step))
@@ -262,7 +275,7 @@ def gen_nebari_ops(config):
     step5 = GHA_job_step(
         name="Push Changes",
         run=(
-            "git config user.email 'nebari@quansight.com' ; "
+            "git config user.email 'nebari@kumulustech.com' ; "
             "git config user.name 'github action' ; "
             "git add ./.gitignore ./.github ./stages; "
             "git diff --quiet && git diff --staged --quiet || (git commit -m '${{ env.COMMIT_MSG }}') ; "
