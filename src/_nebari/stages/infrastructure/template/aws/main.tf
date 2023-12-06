@@ -95,3 +95,24 @@ module "kubernetes" {
   endpoint_private_access = var.eks_endpoint_private_access
   public_access_cidrs     = var.eks_public_access_cidrs
 }
+
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "19.20.0"
+
+  cluster_name = local.cluster_name
+  cluster_version = var.kubernetes_version
+
+  vpc_id     = module.network[0].vpc_id
+  subnet_ids = module.network[0].subnet_ids
+
+  manage_aws_auth_configmap = true
+
+  aws_auth_roles = [
+    {
+      rolearn  = "arn:aws:sts::877956244955:assumed-role/AWSReservedSSO_AdministratorAccess_2c9f8c56ed1e3718/*"
+      username = "admin:{{SessionName}}"
+      groups   = ["system:masters"]
+    }
+  ]
+}
