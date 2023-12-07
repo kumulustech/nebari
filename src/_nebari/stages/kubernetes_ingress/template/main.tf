@@ -15,3 +15,15 @@ module "kubernetes-ingress" {
   load-balancer-ip          = var.load-balancer-ip
   additional-arguments      = var.additional-arguments
 }
+
+data "aws_route53_zone" "existing" {
+  name = "pacioos.dev"
+}
+
+resource "aws_route53_record" "test_pacioos_dev_cname" {
+  zone_id = data.aws_route53_zone.existing.zone_id
+  name    = "test.pacioos.dev"
+  type    = "CNAME"
+  ttl     = "60"
+  records = [module.kubernetes-ingress.endpoint.hostname]
+}
